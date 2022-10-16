@@ -6,6 +6,8 @@ import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
 import "../node_modules/@openzeppelin/contracts/utils/Strings.sol";
 import "../node_modules/hardhat/console.sol";
 
+import {Base64} from "./libraries/Base64.sol";
+
 contract NFTCollection is ERC721URIStorage {
     using Counters for Counters.Counter;
 
@@ -103,17 +105,43 @@ contract NFTCollection is ERC721URIStorage {
         string memory second = pickRandomSecondWord(newTokenId);
         string memory third = pickRandomThirdWord(newTokenId);
 
+        string memory combinedWord = string(
+            abi.encodePacked(first, second, third)
+        );
+
         // 3つの単語を連結させ、SVGファイルを作成する
         string memory finalSvg = string(
-            abi.encodePacked(baseSvg, first, second, third, "</text></svg>")
+            abi.encodePacked(baseSvg, combinedWord, "</text></svg>")
         );
 
         console.log("\n--------------------");
         console.log(finalSvg);
         console.log("--------------------\n");
 
+        // JSONファイルを所定の位置に取得し、base64としてエンコード
+        string memory json = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name": "',
+                        // NFTのタイトルを生成される言葉（例: GrandCuteBird）に設定
+                        combinedWord,
+                        '", "description": "A highly acclaimed collection of squares.", "image": "data:image/svg+xml;base64,',
+                        //  data:image/svg+xml;base64 を追加し、SVG を base64 でエンコードした結果を追加
+                        Base64.encode(bytes(finalSvg)),
+                        '"}'
+                    )
+                )
+            )
+        );
+
+        // データの先頭に data:application/json;base64 を追加
+        string memory finalTokenUri = string(
+            abi.encodePacked("data:application/json;base64,", json)
+        );
+
         _safeMint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, "We will set tokenURI later.");
+        _setTokenURI(newTokenId, finalTokenUri);
 
         console.log("NFT w/ %s has been minted to %s", newTokenId, msg.sender);
 
