@@ -140,6 +140,10 @@ contract NFTCollection is ERC721URIStorage {
             abi.encodePacked("data:application/json;base64,", json)
         );
 
+        console.log("\n----- Token URI ----");
+        console.log(finalTokenUri);
+        console.log("--------------------\n");
+
         _safeMint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, finalTokenUri);
 
