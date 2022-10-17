@@ -1,6 +1,6 @@
 import './styles/App.css';
 import twitterLogo from './assets/twitter-logo.svg';
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 
 // Constantsを宣言する: constとは値書き換えを禁止した変数を宣言する方法です。
 const TWITTER_HANDLE = 'あなたのTwitterのハンドルネームを貼り付けてください';
@@ -11,30 +11,49 @@ const TOTAL_MINT_COUNT = 50;
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
   console.log(currentAccount);
+
   // ブラウザにウォレットがつながっているか確認
-  const checkIfWalletIsConnected = async() => {
+  const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
-    if (!ethereum){
+    if (!ethereum) {
       console.log("please connect Metamask");
       return;
-    }else{
+    } else {
       console.log("found ethereum object", ethereum);
     }
 
-    const accounts = await ethereum.request({ method: "eth_accounts"});
+    const accounts = await ethereum.request({ method: "eth_accounts" });
 
     if (accounts.length !== 0) {
       const account = accounts[0];
       console.log("find account:", account);
       setCurrentAccount(account);
-    }else {
+    } else {
       console.log("no accounts");
     }
   };
 
+  // walletにつなぐ
+  const connectWallet = async () => {
+    try {
+      const ethereum = window;
+      if (!ethereum) {
+        alert("Get Metamask");
+        return;
+      }
+      const accounts = await ethereum.request({ medhod: "eth_requestAccounts" });
+      console.log("Connected:", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+
   // renderNotConnectedContainer メソッドを定義します。
   const renderNotConnectedContainer = () => (
-    <button className="cta-button connect-wallet-button">
+    <button onClick={connectWallet} className="cta-button connect-wallet-button">
       Connect to Wallet
     </button>
   );
@@ -52,7 +71,13 @@ const App = () => {
           <p className="sub-text">
             Create Generative NFT
           </p>
-          {renderNotConnectedContainer()}
+          {currentAccount === "" ? (
+            renderNotConnectedContainer()
+          ) : (
+            <button onClick={null} className="cta-button connect-wallet-button">
+              Mint NFT
+            </button>
+          )}
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
