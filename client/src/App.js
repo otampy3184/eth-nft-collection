@@ -1,6 +1,6 @@
 import './styles/App.css';
 import twitterLogo from './assets/twitter-logo.svg';
-import React, {useEffect} from "react";
+import React, {useState, useEffect} from "react";
 
 // Constantsを宣言する: constとは値書き換えを禁止した変数を宣言する方法です。
 const TWITTER_HANDLE = 'あなたのTwitterのハンドルネームを貼り付けてください';
@@ -9,14 +9,26 @@ const OPENSEA_LINK = '';
 const TOTAL_MINT_COUNT = 50;
 
 const App = () => {
+  const [currentAccount, setCurrentAccount] = useState("");
+  console.log(currentAccount);
   // ブラウザにウォレットがつながっているか確認
-  const checkIfWalletIsConnected = () => {
+  const checkIfWalletIsConnected = async() => {
     const { ethereum } = window;
     if (!ethereum){
       console.log("please connect Metamask");
       return;
     }else{
       console.log("found ethereum object", ethereum);
+    }
+
+    const accounts = await ethereum.request({ method: "eth_accounts"});
+
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      console.log("find account:", account);
+      setCurrentAccount(account);
+    }else {
+      console.log("no accounts");
     }
   };
 
